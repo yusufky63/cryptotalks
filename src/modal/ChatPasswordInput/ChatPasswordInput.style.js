@@ -3,10 +3,9 @@ import {StyleSheet} from "react-native";
 export const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 0,
+   
     backgroundColor: "#fff",
-    alignContent: "center",
-
+ 
     width: "100%",
     borderRadius: 10,
     shadowColor: "#000",
@@ -15,11 +14,24 @@ export const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 10,
+    elevation: 10,
   },
   modal: {
     justifyContent: "flex-end",
     margin: 0,
+  },
+  title: {
+    marginTop: 5,
+    fontSize: 20,
+    fontWeight: 900,
+    textAlign: "center",
+    color: "#000",
+  },
+  container_inner: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    margin: 5,
   },
 });

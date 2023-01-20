@@ -1,23 +1,19 @@
 /* eslint-disable prettier/prettier */
 import {Text, View, TouchableOpacity} from "react-native";
 import React, {useState} from "react";
+import {useNavigation} from "@react-navigation/native";
 import {styles} from "./ChatRoomCard.style";
-import {formatDistance, parseISO} from "date-fns";
-import {tr} from "date-fns/locale";
+
 import auth from "@react-native-firebase/auth";
 import ChatPasswordInput from "../../modal/ChatPasswordInput";
-import {useNavigation} from "@react-navigation/native";
+
 import database from "@react-native-firebase/database";
+import {ErrorShowMessage} from "../../utils/ErrorShowMessage";
 function ChatRoomCard({room}) {
   const navigation = useNavigation();
   const [isVisible, setIsVisible] = useState(false);
-  const [roomName, setRoomName] = useState("");
-  const [roomPassword, setRoomPassword] = useState("");
 
-  const formattedDate = formatDistance(parseISO(room.createdAt), new Date(), {
-    addSuffix: true,
-    locale: tr,
-  });
+  const [roomPassword, setRoomPassword] = useState("");
 
   function userControl() {
     database()
@@ -28,11 +24,13 @@ function ChatRoomCard({room}) {
           const user = Object.values(data).find(
             (user) => user.uid === auth().currentUser.uid
           );
-          if (!user) {
-            database().ref(`ChatRooms/${room.id}/users`).push({
-              uid: auth().currentUser.uid,
-              name: auth().currentUser.displayName,
-            });
+          if (user) {
+            database()
+              .ref(`ChatRooms/${room.id}/users`)
+              .push({
+                uid: auth().currentUser.uid,
+                name: auth().currentUser.email.slice("@", 0),
+              });
           }
         }
       });
@@ -47,10 +45,10 @@ function ChatRoomCard({room}) {
       userControl();
       navigation.navigate("ChatScreen", room);
     } else {
-      console.log("Şifre yanlış");
+      ErrorShowMessage("Hatalı şifre girdiniz!", "danger");
     }
   }
-
+  console.log("111111111111111111111111111111111111", room.users);
   return (
     <TouchableOpacity style={styles.container} onPress={handleToggleInput}>
       <View style={styles.container_main}>
@@ -69,7 +67,7 @@ function ChatRoomCard({room}) {
       </View>
       <View style={styles.container_body}>
         <Text style={styles.userCount}>
-          Katılımcı Sayısı: {room.users.length}
+          Katılımcı Sayısı: {room.users ? room.users.length : "1"}
         </Text>
         <Text style={styles.createdName}>Oluşturan: {room.createdName}</Text>
         {/* <Text style={styles.createdName}>

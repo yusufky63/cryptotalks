@@ -3,9 +3,12 @@ import {colors} from "../../utils/style/colors";
 
 const base_styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: colors.primary,
     padding: 10,
-    margin: 12,
+    margin: 8,
+    maxHeight: 50,
+
     borderWidth: 1,
     borderColor: "#ddd",
     shadowColor: "#000",

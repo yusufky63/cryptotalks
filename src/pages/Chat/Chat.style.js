@@ -1,7 +1,7 @@
-import { StyleSheet } from "react-native";
+import {StyleSheet} from "react-native";
 
 export const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {flex: 1},
   title: {},
   container_inner: {
     flex: 1,
@@ -17,7 +17,19 @@ export const styles = StyleSheet.create({
     margin: 5,
   },
   flatList: {
-    top: 0,
-    bottom: 80,
+    width: "100%",
+    height: "85%",
+  },
+  header: {
+justifyContent: "space-between",
+    flexDirection: "row",
+    backgroundColor: "gray",
+  },
+  headerText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: 10,
   },
 });

@@ -6,7 +6,7 @@ import {formatDistance, parseISO} from 'date-fns';
 import {tr} from 'date-fns/locale';
 import auth from '@react-native-firebase/auth';
 function MessageCard({message}) {
-  const [theme, setTheme] = useState('primary');
+  const [theme, setTheme] = useState('secondary');
   const formattedDate = formatDistance(
     parseISO(message.createdAt),
     new Date(),
@@ -24,7 +24,7 @@ function MessageCard({message}) {
 
   useEffect(() => {
     if (message.createdName+"@gmail.com" === auth().currentUser.email) {
-      setTheme('secondary');
+      setTheme('primary');
     }
   }, []);
 

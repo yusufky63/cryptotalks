@@ -1,9 +1,9 @@
-import { View, TouchableOpacity, Text } from "react-native";
+import {View, TouchableOpacity, Text} from "react-native";
 import React from "react";
 
 import styles from "./Button.style";
 
-const Button = ({ title, onPress, IconName, theme = "primary" }) => {
+const Button = ({title, onPress, IconName, theme = "primary"}) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -11,7 +11,7 @@ const Button = ({ title, onPress, IconName, theme = "primary" }) => {
       activeOpacity={0.6}
       underlayColor="#DDDDDD"
     >
-      {IconName && <IconName name="google" size={20} color="red" />}
+      {IconName && <IconName name={IconName} size={20} color="red" />}
       <Text style={styles[theme].title}>{title}</Text>
     </TouchableOpacity>
   );

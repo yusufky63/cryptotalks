@@ -20,12 +20,17 @@ function ChatPasswordInput({
       visible={isVisible}
     >
       <View style={styles.container}>
+        <Text style={styles.title}>Oda Şifresi</Text>
         <Input
-          placeholder={"Oda Şifresi"}
+          autoFocus={true}
+          placeholder={"Şifreyi Giriniz (Şifreli ise)"}
           secureTextEntry={false}
           onChangeText={setRoomPassword}
         />
-        <Button title="Katıl" onPress={handleJoinRoom} theme="secondary" />
+        <View style={styles.container_inner}>
+          <Button title="Katıl" onPress={handleJoinRoom} theme="secondary" />
+          <Button title="Geri" onPress={handleToggleInput} theme="primary" />
+        </View>
       </View>
     </Modal>
   );

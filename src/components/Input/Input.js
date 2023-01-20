@@ -1,7 +1,7 @@
 import React from "react";
 import {View, TextInput} from "react-native";
 import {styles} from "./Input.style";
-function Input({onChangeText, placeholder, secureTextEntry}) {
+function Input({onChangeText, placeholder, secureTextEntry, autoFocus, value}) {
   return (
     <View style={styles.container}>
       <TextInput
@@ -9,7 +9,8 @@ function Input({onChangeText, placeholder, secureTextEntry}) {
         onChangeText={onChangeText}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
-       
+        autoFocus={autoFocus}
+        value={value}
       />
     </View>
   );

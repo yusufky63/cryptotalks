@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
-import {Text, View, FlatList} from "react-native";
+import {Button, View, FlatList} from "react-native";
 import auth from "@react-native-firebase/auth";
 import React, {useEffect, useState} from "react";
 import ChatRoomsAddInput from "../../modal/ChatRoomsAddInput";
@@ -9,9 +9,10 @@ import {styles} from "./ChatRooms.style";
 import parseContentData from "../../utils/parseContentData";
 import database from "@react-native-firebase/database";
 import ChatRoomCard from "../../components/ChatRoomCard";
-import ChatPasswordInput from "../../modal/ChatPasswordInput";
 
 function ChatRooms({navigation}) {
+
+
   const [isVisible, setIsVisible] = useState(false);
   const [chatRooms, setChatRooms] = useState([]);
   const [roomName, setRoomName] = useState("");
@@ -38,18 +39,15 @@ function ChatRooms({navigation}) {
   }
 
   function handleCreateRoom() {
-    console.log(roomName);
     database()
       .ref("/ChatRooms")
       .push({
-        createdName: auth().currentUser.email,
+        createdName: auth().currentUser.email.split("@")[0],
         name: roomName,
-        users: [{uid: auth().currentUser.uid, name: auth().currentUser.email}],
+        users: [{}],
         password: roomPassword,
         createdAt: new Date().toISOString(),
-        Messages: [
-          {text: "Oda Oluşturuldu", createdAt: new Date().toISOString()},
-        ],
+        Messages: [{}],
       });
     handleToggleInput();
   }
@@ -58,7 +56,7 @@ function ChatRooms({navigation}) {
 
   return (
     <View style={styles.container}>
-      <FlatList data={chatRooms} renderItem={renderItem} />
+      <FlatList removeClippedSubviews={false} data={chatRooms} renderItem={renderItem} />
       <FlatButton onPress={handleToggleInput} />
       <ChatRoomsAddInput
         isVisible={isVisible}
