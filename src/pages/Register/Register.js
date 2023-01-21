@@ -2,63 +2,68 @@
 /* eslint-disable quotes */
 /* eslint-disable no-undef */
 
-import React from 'react';
-import { styles } from "./Register.style";
-import { View, Text } from "react-native";
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import auth from '@react-native-firebase/auth';
+import React from "react";
+import {styles} from "./Register.style";
+import {View, Text} from "react-native";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import auth from "@react-native-firebase/auth";
 
-import { ErrorShowMessage } from '../../utils/ErrorShowMessage';
-import ErrorMessage from '../../utils/ErrorMessages';
-import { Formik } from "formik";
+import {ErrorShowMessage} from "../../utils/ErrorShowMessage";
+import ErrorMessage from "../../utils/ErrorMessages";
+import {Formik} from "formik";
 
-function Register({ navigation }) {
+function Register({navigation}) {
   function handleLogin() {
-    navigation.navigate('LoginScreen');
+    navigation.navigate("LoginScreen");
   }
 
   function goChatRooms() {
-    navigation.navigate('ChatRoomsScreen');
+    navigation.navigate("ChatRoomsScreen");
   }
 
   const initialValues = {
-    email: '',
-    password: '',
-    repassword: '',
+    email: "",
+    password: "",
+    repassword: "",
   };
   const handleFormSubmit = async (values) => {
     if (
-      values.email == '' ||
-      values.password == '' ||
-      values.repassword == '' ||
+      values.email == "" ||
+      values.password == "" ||
+      values.repassword == "" ||
       values.password != values.repassword
     ) {
       ErrorShowMessage(
-        'Parolanız eşleşmiyor veya boş alan bırakmayınız.',
-        'warning'
+        "Parolanız eşleşmiyor veya boş alan bırakmayınız.",
+        "warning"
       );
       return;
     }
     try {
       await auth()
         .createUserWithEmailAndPassword(values.email, values.password)
-        .then(() => {
-          ErrorShowMessage('Kayıt Başarılı.', 'success');
+        .then((res) => {
+          res.user.updateProfile({
+            displayName: values.email.split("@")[0],
+            photoURL:
+              "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?f=y",
+          });
+          ErrorShowMessage("Kayıt Başarılı.", "success");
           goChatRooms();
         })
         .catch((error) => {
-          ErrorShowMessage(ErrorMessage(error.code), 'danger');
+          ErrorShowMessage(ErrorMessage(error.code), "danger");
         });
     } catch (error) {
-      ErrorShowMessage(ErrorMessage(error.code), 'danger');
+      ErrorShowMessage(ErrorMessage(error.code), "danger");
     }
   };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Kayıt Ol</Text>
       <Formik initialValues={initialValues} onSubmit={handleFormSubmit}>
-        {({ handleChange, handleSubmit, values }) => (
+        {({handleChange, handleSubmit, values}) => (
           <>
             <Input
               value={values.email}
@@ -74,7 +79,7 @@ function Register({ navigation }) {
             />
             <Input
               value={values.repassword}
-              placeholder={'Tekrar Şifre'}
+              placeholder={"Tekrar Şifre"}
               onChangeText={handleChange("repassword")}
               secureTextEntry={true}
             />
@@ -82,7 +87,7 @@ function Register({ navigation }) {
           </>
         )}
       </Formik>
-      <Button title={'Giriş Yap'} onPress={handleLogin} />
+      <Button title={"Giriş Yap"} onPress={handleLogin} />
     </View>
   );
 }

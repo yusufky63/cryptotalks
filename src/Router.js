@@ -6,20 +6,19 @@ import {NavigationContainer} from "@react-navigation/native";
 import {Image} from "react-native";
 import FlashMessage from "react-native-flash-message";
 import auth from "@react-native-firebase/auth";
-import {createDrawerNavigator} from "@react-navigation/drawer";
+
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import {colors} from "./utils/style/colors";
-import "react-native-gesture-handler";
+
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import ChatRooms from "./pages/ChatRooms";
 import Chat from "./pages/Chat";
-import CustomSidebarMenu from "./pages/Auth/DrawerExitButton";
-const Drawer = createDrawerNavigator();
+
 const Stack = createNativeStackNavigator();
 
-const Router = () => {
+const Router = ({navigation}) => {
   const [userSession, setUserSession] = useState();
 
   useEffect(() => {
@@ -28,72 +27,61 @@ const Router = () => {
     });
   }, []);
 
-  const AuthStack = ({navigation}) => {
+  const AuthStack = () => {
     return (
-      <Drawer.Navigator screenOptions={{headerShown: false}}>
-        <Drawer.Screen name="WelcomeScreen" component={Welcome} />
-        <Drawer.Screen name="LoginScreen" component={Login} />
-        <Drawer.Screen name="RegisterScreen" component={Register} />
-      </Drawer.Navigator>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
+        <Stack.Screen name="WelcomeScreen" component={Welcome} />
+        <Stack.Screen name="LoginScreen" component={Login} />
+        <Stack.Screen name="RegisterScreen" component={Register} />
+      </Stack.Navigator>
     );
   };
   return (
     <NavigationContainer>
-      <Drawer.Navigator>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
         {!userSession ? (
-          <Drawer.Screen name="AuthStack" component={AuthStack} />
+          <Stack.Screen name="AuthStack" component={AuthStack} />
         ) : (
           <>
-            <Drawer.Screen
-              name="Profile"
-              component={CustomSidebarMenu}
-              options={{
-                header: () => (
-                  <Icon.Button
-                    name="menu"
-                    size={25}
-                    backgroundColor={colors.primary}
-                    onPress={() => {}}
-                  />
-                ),
-
-                headerShown: false,
-                title: "Profil",
-                headerTitleAlign: "center",
-
-                headerTintColor: colors.secondary,
-              }}
-            />
-            <Drawer.Screen
+            <Stack.Screen
               name="ChatRoomsScreen"
               options={{
                 headerShown: true,
                 title: "Sohbet Odaları",
                 headerTitleAlign: "center",
                 headerTintColor: colors.secondary,
+                headerRight: () => (
+                  <Icon
+                    name="logout"
+                    color={colors.secondary}
+                    size={28}
+                    onPress={() => auth().signOut()}
+                  />
+                ),
+                headerLeft: () => (
+                  <Image
+                    source={{uri: auth().currentUser.photoURL}}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      marginLeft: -10,
+                      borderWidth: 3,
+                      borderColor: "#fff",
+                    }}
+                  />
+                ),
               }}
               component={ChatRooms}
             />
-            <Drawer.Screen
-              name="ChatScreen"
-              options={{headerShown: false}}
-              component={Chat}
-            />
-            <Drawer.Screen
-              name="Exit"
-              component={CustomSidebarMenu}
-              options={{
-                headerShown: false,
-                title: "Çıkış Yap",
-                headerTitleAlign: "center",
-
-                headerTintColor: colors.secondary,
-              }}
-            />
           </>
         )}
-      </Drawer.Navigator>
-
+        <Stack.Screen
+          name="ChatScreen"
+          options={{headerShown: true}}
+          component={Chat}
+        />
+      </Stack.Navigator>
       <FlashMessage position="top" />
     </NavigationContainer>
   );

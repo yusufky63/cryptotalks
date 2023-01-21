@@ -1,8 +1,8 @@
-import {StyleSheet} from "react-native";
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
-   alignItems: "stretch",
+    alignItems: "stretch",
     position: "absolute",
     bottom: 0,
     backgroundColor: "#fff",
@@ -19,9 +19,8 @@ export const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
- modal: {
+  modal: {
     justifyContent: "flex-end",
     margin: 0,
-    },
-
+  },
 });

@@ -3,7 +3,6 @@ import {colors} from "../../utils/style/colors";
 import {Dimensions} from "react-native";
 const base_styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#f2f2f2",
@@ -11,6 +10,7 @@ const base_styles = StyleSheet.create({
     padding: 10,
     margin: 10,
     maxWidth: Dimensions.get("window").width * 0.8,
+    alignItems: "center",
   },
   title: {
     fontSize: 12,
@@ -23,6 +23,14 @@ const base_styles = StyleSheet.create({
   date: {
     fontSize: 12,
   },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default {
@@ -30,6 +38,8 @@ export default {
   primary: StyleSheet.create({
     ...base_styles,
     container: {
+      flexDirection: "row-reverse",
+      justifyContent: "space-between",
       ...base_styles.container,
 
       alignSelf: "flex-end",
@@ -43,10 +53,18 @@ export default {
       alignSelf: "flex-end",
       fontSize: 12,
     },
+    avatar: {
+      ...base_styles.avatar,
+      justifyContent: "center",
+      alignItems: "center",
+    },
   }),
   secondary: StyleSheet.create({
     ...base_styles,
     container: {
+      flexDirection: "row",
+
+      justifyContent: "space-between",
       ...base_styles.container,
 
       alignSelf: "flex-start",
@@ -60,6 +78,11 @@ export default {
       ...base_styles.date,
       fontSize: 12,
       alignSelf: "flex-end",
+    },
+    avatar: {
+      ...base_styles.avatar,
+      justifyContent: "center",
+      alignItems: "center",
     },
   }),
 };

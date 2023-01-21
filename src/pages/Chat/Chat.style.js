@@ -21,7 +21,7 @@ export const styles = StyleSheet.create({
     height: "85%",
   },
   header: {
-justifyContent: "space-between",
+    justifyContent: "space-between",
     flexDirection: "row",
     backgroundColor: "gray",
   },
@@ -31,5 +31,28 @@ justifyContent: "space-between",
     fontWeight: "bold",
     textAlign: "center",
     padding: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 10,
+    margin: 5,
+    padding: 5,
+    shadowColor: "#fff",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "gray",
+    fontSize: 12,
   },
 });

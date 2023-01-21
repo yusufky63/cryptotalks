@@ -43,6 +43,7 @@ function ChatRoomCard({room}) {
   function handleJoinRoom() {
     if (room.password === roomPassword) {
       userControl();
+      handleToggleInput();
       navigation.navigate("ChatScreen", room);
     } else {
       ErrorShowMessage("Hatalı şifre girdiniz!", "danger");

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
-import {Button, View, FlatList} from "react-native";
+import {Button, View, FlatList, Text} from "react-native";
 import auth from "@react-native-firebase/auth";
 import React, {useEffect, useState} from "react";
 import ChatRoomsAddInput from "../../modal/ChatRoomsAddInput";
@@ -9,10 +9,11 @@ import {styles} from "./ChatRooms.style";
 import parseContentData from "../../utils/parseContentData";
 import database from "@react-native-firebase/database";
 import ChatRoomCard from "../../components/ChatRoomCard";
+import firestore from "@react-native-firebase/firestore";
+import {ErrorShowMessage} from "../../utils/ErrorShowMessage";
+import ErrorMessages from "../../utils/ErrorMessages";
 
 function ChatRooms({navigation}) {
-
-
   const [isVisible, setIsVisible] = useState(false);
   const [chatRooms, setChatRooms] = useState([]);
   const [roomName, setRoomName] = useState("");
@@ -23,14 +24,16 @@ function ChatRooms({navigation}) {
   }, []);
 
   function getChatRooms() {
-    database()
-      .ref("/ChatRooms")
-      .on("value", (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const parsedData = parseContentData(data);
-          setChatRooms(parsedData);
-        }
+    firestore()
+      .collection("ChatRooms")
+      .onSnapshot((snapshot) => {
+        const rooms = snapshot.docs.map((doc) => {
+          return {
+            ...doc.data(),
+            id: doc.id,
+          };
+        });
+        setChatRooms(rooms);
       });
   }
 
@@ -39,24 +42,47 @@ function ChatRooms({navigation}) {
   }
 
   function handleCreateRoom() {
-    database()
-      .ref("/ChatRooms")
-      .push({
-        createdName: auth().currentUser.email.split("@")[0],
+    firestore()
+      .collection("ChatRooms")
+      .add({
+        createdName: auth().currentUser.email,
         name: roomName,
-        users: [{}],
+        users: [
+          {
+            email: auth().currentUser.email,
+            name: auth().currentUser.displayName,
+            joinedAt: new Date().toISOString(),
+          },
+        ],
+        isSecure: roomPassword ? true : false,
         password: roomPassword,
         createdAt: new Date().toISOString(),
-        Messages: [{}],
+      })
+
+      .then(() => {
+        ErrorShowMessage("Başarılı", "success");
+      })
+      .catch((error) => {
+        ErrorShowMessage(ErrorMessages[error.code], "danger");
       });
+
     handleToggleInput();
   }
-
+  console.log(auth().currentUser.displayName);
   const renderItem = ({item}) => <ChatRoomCard room={item} />;
 
   return (
     <View style={styles.container}>
-      <FlatList removeClippedSubviews={false} data={chatRooms} renderItem={renderItem} />
+      {!chatRooms.length > 0 && (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Oda Yok</Text>
+        </View>
+      )}
+      <FlatList
+        removeClippedSubviews={false}
+        data={chatRooms}
+        renderItem={renderItem}
+      />
       <FlatButton onPress={handleToggleInput} />
       <ChatRoomsAddInput
         isVisible={isVisible}

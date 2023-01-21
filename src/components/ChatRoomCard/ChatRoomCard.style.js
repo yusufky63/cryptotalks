@@ -39,7 +39,6 @@ export const styles = StyleSheet.create({
     padding: 1,
     paddingHorizontal: 5,
     fontSize: 15,
-
   },
   nopassword: {
     color: "#fff",
