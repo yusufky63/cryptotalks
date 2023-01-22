@@ -2,35 +2,40 @@
 /* eslint-disable no-shadow */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import React, {useEffect, useState, useCallback} from "react";
+import React, {useEffect, useState} from "react";
 import {
   View,
-  FlatList,
   Text,
-  ToastAndroid,
-  PermissionsAndroid,
+  Switch,
+  StyleSheet,
+  ActivityIndicator,
+  Clipboard,
 } from "react-native";
-import {formatDistance, parseISO} from "date-fns";
-import {tr} from "date-fns/locale";
-import {styles} from "./Chat.style";
-import {GiftedChat, Send, Actions} from "react-native-gifted-chat";
-import Clipboard from "@react-native-clipboard/clipboard";
+import {
+  GiftedChat,
+  Send,
+  Actions,
+  InputToolbar,
+  Bubble,
+  SystemMessage,
+  Composer,
+  MessageText,
+} from "react-native-gifted-chat";
 import auth from "@react-native-firebase/auth";
-import Icon from "react-native-vector-icons/FontAwesome";
-import MessageCard from "../../components/MessageCard";
-import MessageTextModal from "../../modal/MessageTextModal";
-import database from "@react-native-firebase/database";
+import Icon from "react-native-vector-icons/Ionicons";
 import firestore from "@react-native-firebase/firestore";
-import {ActivityIndicator} from "react-native";
-import {launchCamera, launchImageLibrary} from "react-native-image-picker";
 import storage from "@react-native-firebase/storage";
-import ErrorMessages from "../../utils/ErrorMessages";
-import {ErrorShowMessage} from "../../utils/ErrorShowMessage";
+import {launchImageLibrary, launchCamera} from "react-native-image-picker";
+import {IconButton} from "react-native-paper";
+
 function Chat({navigation, route}) {
   const [messages, setMessages] = useState([]);
   const room = route.params;
 
+  const [isTyping, setIsTyping] = useState(false);
+
   useEffect(() => {
+    console.log(room);
     navigation.setOptions({title: route.params.name});
 
     return firestore()
@@ -38,10 +43,11 @@ function Chat({navigation, route}) {
       .onSnapshot((snapshot) => {
         setMessages(snapshot.data()?.messages ?? []);
       });
-  }, [room.id]);
+  }, [navigation, room, room.id, route.params.name]);
 
-  const handleUploadImage = (image) => {
-    const uploadTask = storage()
+  const handleUploadImage = async (image) => {
+    console.log("Resim", image);
+    const uploadTask = await storage()
       .ref(`images/${image.fileName}`)
       .putFile(image.uri);
     uploadTask.on(
@@ -66,17 +72,24 @@ function Chat({navigation, route}) {
       () => {
         uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
           console.log("File available at", downloadURL);
-          onSend([
-            {
-              _id: Math.round(Math.random() * 1000000),
-              image: downloadURL,
-              createdAt: new Date(),
-              user: {
-                _id: auth().currentUser.uid,
-                name: auth().currentUser.displayName,
+          firestore()
+            .doc("ChatRooms/" + room.id)
+            .set(
+              {
+                messages: GiftedChat.append(messages, {
+                  _id: Math.random().toString(36).substring(7),
+                  text: "",
+                  createdAt: new Date(),
+                  user: {
+                    _id: auth().currentUser.uid,
+                    name: auth().currentUser.displayName,
+                    avatar: auth().currentUser.photoURL,
+                  },
+                  image: downloadURL,
+                }),
               },
-            },
-          ]);
+              {merge: true}
+            );
         });
       }
     );
@@ -107,6 +120,65 @@ function Chat({navigation, route}) {
       );
   };
 
+  function renderLoading() {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6646ee" />
+        <Text>Yükleniyor</Text>
+      </View>
+    );
+  }
+
+  function scrollToBottomComponent() {
+    return (
+      <View style={styles.bottomComponentContainer}>
+        <IconButton icon="chevron-double-down" size={36} color="#6646ee" />
+      </View>
+    );
+  }
+
+  const customtInputToolbar = (props) => {
+    return (
+      <InputToolbar
+        {...props}
+        containerStyle={{
+          backgroundColor: "white",
+          borderTopColor: "#E8E8E8",
+          borderTopWidth: 1,
+          padding: 3,
+        }}
+      />
+    );
+  };
+
+  const handleTakePhoto = () => {
+    launchCamera({mediaType: "photo"}, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.error) {
+        console.log("ImagePicker Error: ", response.error);
+      } else if (response.customButton) {
+        console.log("User tapped custom button: ", response.customButton);
+      } else {
+        handleUploadImage(response.assets[0]);
+      }
+    });
+  };
+
+  const handleInputTextChanged = (text) => {
+    if (text.length > 0) {
+      firestore().collection("ChatRooms").doc(room.id).update({
+        typing: true,
+      });
+      setIsTyping(true);
+    } else {
+      firestore().collection("ChatRooms").doc(room.id).update({
+        typing: false,
+      });
+      setIsTyping(false);
+    }
+  };
+
   // const renderItem = ({item}) => <MessageCard message={item} />;
 
   return (
@@ -122,14 +194,31 @@ function Chat({navigation, route}) {
           name: auth().currentUser.displayName,
           avatar: auth().currentUser.photoURL,
         }}
+        renderLoading={renderLoading}
         showAvatarForEveryMessage={true}
-        isTyping={true}
+        isTyping={isTyping}
         placeholder="Mesajınızı yazın..."
+        renderUserName
         alwaysShowSend={true}
         timeFormat="HH:mm"
-        renderUsernameOnMessage={true}
+        renderUsernameOnMessage
         renderAvatarOnTop={true}
+        // renderChatEmpty={() => (
+        //   <View
+        //     style={{alignItems: "center", justifyContent: "center", flex: 1}}
+        //   >
+        //     <Text style={{fontSize: 18, color: "#2e64e5", fontWeight: "bold"}}>
+        //       Burada hiç mesaj yok
+        //     </Text>
+        //   </View>
+        // )}
         ActivityIndicator={true}
+        renderInputToolbar={customtInputToolbar}
+        onInputTextChanged={handleInputTextChanged}
+        sent={true}
+        scrollToBottom
+        pending={true}
+        received={true}
         renderSend={(props) => (
           <Send
             {...props}
@@ -143,6 +232,7 @@ function Chat({navigation, route}) {
             <Icon name="send" size={25} color="#2e64e5" />
           </Send>
         )}
+        scrollToBottomComponent={scrollToBottomComponent}
         renderActions={(props) => (
           <Actions
             {...props}
@@ -150,15 +240,17 @@ function Chat({navigation, route}) {
               height: 50,
               width: 50,
               justifyContent: "center",
+
               alignItems: "center",
               marginBottom: 0,
             }}
             options={{
               "Galeriden Gönder": handleSelectImage,
-              "Kameradan Gönder": handleSelectImage,
+              "Fotoğraf Çek": handleTakePhoto,
+
               İptal: () => {},
             }}
-            icon={() => <Icon name="plus" size={25} color="#2e64e5" />}
+            icon={() => <Icon name="attach-sharp" size={25} color="#2e64e5" />}
             optionTintColor="#222B45"
           />
         )}
@@ -168,3 +260,32 @@ function Chat({navigation, route}) {
 }
 
 export default Chat;
+
+const styles = StyleSheet.create({
+  // rest remains same
+  bottomComponentContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  sendingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  systemMessageWrapper: {
+    backgroundColor: "#6646ee",
+    borderRadius: 4,
+    padding: 5,
+  },
+  systemMessageText: {
+    fontSize: 14,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+});

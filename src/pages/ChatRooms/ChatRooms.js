@@ -23,6 +23,7 @@ function ChatRooms({navigation}) {
     getChatRooms();
   }, []);
 
+
   function getChatRooms() {
     firestore()
       .collection("ChatRooms")
